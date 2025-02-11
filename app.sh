@@ -10,8 +10,16 @@ listen() {
 }
 
 send() {
+  if [[ -z "$1" || -z "$2" ]]; then
+    echo "Usage: send <recipient_last_octet> [-b <beep_id>] <message>"
+    return 1
+  fi
+
+  local recipient_ip="10.0.0.$1"
+  shift
+
   local beep_id="0"
-  local message="$1"
+  local message=""
 
   while [[ "$1" != "" ]]; do
     case "$1" in
@@ -20,7 +28,12 @@ send() {
     esac
   done
 
-  echo "$beep_id|$message" | nc 10.0.0.75 12345
+  if [[ -z "$message" ]]; then
+    echo "Error: No message provided."
+    return 1
+  fi
+
+  echo "$beep_id|$message" | nc "$recipient_ip" 12345
 }
 
 beep_sound() {
